@@ -3,8 +3,10 @@ package com.irojas.demojwt.Service;
 import com.irojas.demojwt.DTO.RequestDTO;
 import com.irojas.demojwt.DTO.TourDetailDTO;
 import com.irojas.demojwt.DTO.TourSummary;
+import com.irojas.demojwt.Entity.CategoriaTour;
 import com.irojas.demojwt.Entity.Tour;
 import com.irojas.demojwt.Entity.TourImage;
+import com.irojas.demojwt.Repository.CategoriaTourRepository;
 import com.irojas.demojwt.Repository.TourImageRepository;
 import com.irojas.demojwt.Repository.TourRepository;
 import jakarta.transaction.Transactional;
@@ -22,6 +24,17 @@ public class TourService {
     private  TourRepository tourRepository;
     @Autowired
     private  TourImageRepository tourImageRepository;
+    @Autowired
+    private CategoriaTourRepository categoriaTourRepository ;
+
+
+    public List<TourSummary> getToursByCategory(Integer categoriaId) {
+        // Obtener tours por categoria desde el repositorio
+        List<Tour> tours = tourRepository.findByCategoriaTourId(categoriaId); // Asegúrate de tener este método en el repositorio
+        return tours.stream()
+                .map(tour -> new TourSummary(tour))  // Usamos el constructor de TourSummary para convertir Tour a TourSummary
+                .collect(Collectors.toList());  // Coleccionamos en una lista de TourSummary
+    }
 
 
 
@@ -50,8 +63,6 @@ public class TourService {
                 .descripcion(tour.getDescripcion())
                 .ubicacion(tour.getUbicacion())
                 .precio(tour.getPrecio())
-                .fechaInicio(tour.getFechaInicio())
-                .fechaFin(tour.getFechaFin())
                 .imagenes(imagenes)
                 .build();
     }
@@ -60,12 +71,15 @@ public class TourService {
     @Transactional
     public String addTour(RequestDTO tourRequestDTO) {
         try {
+            // Buscar la categoría por ID
+            CategoriaTour categoria = categoriaTourRepository.findById(tourRequestDTO.getCategoriaId())
+                    .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+
             Tour newTour = new Tour();
+            newTour.setCategoriaTour(categoria); // Se asigna la entidad, no solo el ID
             newTour.setNombre(tourRequestDTO.getNombre());
             newTour.setDescripcion(tourRequestDTO.getDescripcion());
             newTour.setUbicacion(tourRequestDTO.getUbicacion());
-            newTour.setFechaInicio(tourRequestDTO.getFechaInicio());
-            newTour.setFechaFin(tourRequestDTO.getFechaFin());
             newTour.setPrecio(tourRequestDTO.getPrecio());
             newTour.setDisponibilidad(tourRequestDTO.getDisponibilidad());
             newTour.setImagen(tourRequestDTO.getImagen());
@@ -85,18 +99,19 @@ public class TourService {
             return "Error al agregar el tour: " + e.getMessage();
         }
     }
+
     @Transactional
     public String updateTour(Long id, RequestDTO tourRequestDTO) {
         try {
 
+            CategoriaTour categoria = categoriaTourRepository.findById(tourRequestDTO.getCategoriaId())
+                    .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
             Tour existingTour = tourRepository.findById(id).orElseThrow(() -> new RuntimeException("Tour no encontrado"));
 
-
+            existingTour.setCategoriaTour(categoria);
             existingTour.setNombre(tourRequestDTO.getNombre());
             existingTour.setDescripcion(tourRequestDTO.getDescripcion());
             existingTour.setUbicacion(tourRequestDTO.getUbicacion());
-            existingTour.setFechaInicio(tourRequestDTO.getFechaInicio());
-            existingTour.setFechaFin(tourRequestDTO.getFechaFin());
             existingTour.setPrecio(tourRequestDTO.getPrecio());
             existingTour.setDisponibilidad(tourRequestDTO.getDisponibilidad());
             existingTour.setImagen(tourRequestDTO.getImagen());

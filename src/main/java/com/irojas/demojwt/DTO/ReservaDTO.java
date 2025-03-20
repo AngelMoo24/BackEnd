@@ -15,6 +15,6 @@ public class ReservaDTO {
 
     private Long tourId;
     private Integer usuarioId;
+    private Integer horarioId;
     private int cantidadPersonas;
-    private EstadoReserva estado;
 }

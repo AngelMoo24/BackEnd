@@ -19,7 +19,5 @@ public class TourDetailDTO {
     private String descripcion;
     private String ubicacion;
     private Double precio;
-    private LocalDate fechaInicio; // Fecha de inicio
-    private LocalDate fechaFin;
     private List<String> imagenes; // Lista de URLs para el carrusel
 }

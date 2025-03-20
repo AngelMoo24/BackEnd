@@ -23,6 +23,15 @@ public class TourContoller {
     private  TourService tourService;
 
 
+    @GetMapping("/categoria/{categoriaId}")
+    public ResponseEntity<List<TourSummary>> getToursByCategory(@PathVariable Integer categoriaId) {
+        List<TourSummary> tours = tourService.getToursByCategory(categoriaId);
+        if (tours.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Respuesta vacía si no hay tours en esa categoría
+        }
+        return new ResponseEntity<>(tours, HttpStatus.OK);
+    }
+
     @GetMapping
     public List<TourSummary> getAllTours() {
         return tourService.getAllToursSummary();

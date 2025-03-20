@@ -27,6 +27,10 @@ public class Reserva {
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;  // Relación con la entidad Tour (si tienes esta entidad creada)
 
+    @ManyToOne
+    @JoinColumn(name = "horario_id", nullable = false)
+    private Horarios horarios;  // Relación con la entidad Tour (si tienes esta entidad creada)
+
     @Column(nullable = false)
     private LocalDateTime fechaReserva;
 
@@ -36,6 +40,5 @@ public class Reserva {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EstadoReserva estado;
-
 
 }

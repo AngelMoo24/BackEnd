@@ -2,10 +2,8 @@ package com.irojas.demojwt.Service;
 
 import com.irojas.demojwt.DTO.ReservaDTO;
 import com.irojas.demojwt.DTO.ReservaResponseDTO;
-import com.irojas.demojwt.Entity.EstadoReserva;
-import com.irojas.demojwt.Entity.Reserva;
-import com.irojas.demojwt.Entity.Tour;
-import com.irojas.demojwt.Entity.User;
+import com.irojas.demojwt.Entity.*;
+import com.irojas.demojwt.Repository.HorariosRepository;
 import com.irojas.demojwt.Repository.ReservaRepository;
 import com.irojas.demojwt.Repository.TourRepository;
 import com.irojas.demojwt.Repository.UserRepository;
@@ -30,6 +28,9 @@ public class ReservaService {
     @Autowired
     private TourRepository tourRepository;
 
+    @Autowired
+    private HorariosRepository horariosRepository;
+
 
     public Reserva crearReserva(ReservaDTO reservaRequestDTO) {
         User usuario = userRepository.findById(reservaRequestDTO.getUsuarioId())
@@ -38,15 +39,27 @@ public class ReservaService {
         Tour tour = tourRepository.findById(reservaRequestDTO.getTourId())
                 .orElseThrow(() -> new RuntimeException("Tour no encontrado"));
 
+        Horarios horarios = horariosRepository.findById(reservaRequestDTO.getHorarioId())
+                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+
+        if (horarios.getCuposDisponibles() < reservaRequestDTO.getCantidadPersonas()) {
+            throw new RuntimeException("No hay suficientes cupos disponibles para este horario.");
+        }
+
         Reserva reserva = Reserva.builder()
                 .usuario(usuario)
                 .tour(tour)
+                .horarios(horarios)
                 .fechaReserva(LocalDateTime.now())
                 .cantidadPersonas(reservaRequestDTO.getCantidadPersonas())
-                .estado(EstadoReserva.PENDIENTE)
                 .build();
+        reserva = reservaRepository.save(reserva);
 
-        return reservaRepository.save(reserva);
+
+        horarios.setCuposDisponibles(horarios.getCuposDisponibles() - reservaRequestDTO.getCantidadPersonas());
+        horariosRepository.save(horarios);
+
+        return reserva;
     }
 
     public ReservaResponseDTO obtenerReserva(Integer id) {
@@ -56,7 +69,7 @@ public class ReservaService {
         String nombreCompleto = reserva.getUsuario().getFirstname() + " " + reserva.getUsuario().getLastname();
 
         return ReservaResponseDTO.builder()
-                .nombreUsuario(nombreCompleto) // Concatenamos firstName y lastName
+                .nombreUsuario(nombreCompleto)
                 .nombreTour(reserva.getTour().getNombre())
                 .cantidadPersonas(reserva.getCantidadPersonas())
                 .estado(reserva.getEstado().name())
@@ -75,25 +88,35 @@ public class ReservaService {
         var tour = tourRepository.findById(reservaRequestDTO.getTourId())
                 .orElseThrow(() -> new RuntimeException("Tour no encontrado"));
 
+        Horarios horarios = horariosRepository.findById(reservaRequestDTO.getHorarioId())
+                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+
+        if (horarios.getCuposDisponibles() < reservaRequestDTO.getCantidadPersonas()) {
+            throw new RuntimeException("No hay suficientes cupos disponibles para este horario.");
+        }
+
+
         reserva.setUsuario(usuario);
         reserva.setTour(tour);
+        reserva.setHorarios(horarios);
         reserva.setCantidadPersonas(reservaRequestDTO.getCantidadPersonas());
         reserva.setFechaReserva(java.time.LocalDateTime.now());
 
-        if (reservaRequestDTO.getEstado() != null) {
-            reserva.setEstado(reservaRequestDTO.getEstado());
-        } else {
-            reserva.setEstado(reserva.getEstado());
-        }
+        horarios.setCuposDisponibles(horarios.getCuposDisponibles() - reservaRequestDTO.getCantidadPersonas());
+        horariosRepository.save(horarios);
 
         reservaRepository.save(reserva);
     }
 
 
+    public void eliminarReserva(Integer reservaId) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
+        Horarios horario = reserva.getHorarios();
 
-    public void eliminarReserva(Integer id) {
-        Reserva reserva = reservaRepository.findById(id).orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+        horario.setCuposDisponibles(horario.getCuposDisponibles() + reserva.getCantidadPersonas());
+        horariosRepository.save(horario);
         reservaRepository.delete(reserva);
     }
 
