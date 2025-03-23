@@ -22,6 +22,7 @@ public class CategoriaTourService {
         CategoriaTour categoria = CategoriaTour.builder()
                 .nombre(request.getNombre())
                 .descripcion(request.getDescripcion())
+                .imagen(request.getImagen())
                 .build();
         return categoriaTourRepository.save(categoria);
     }
@@ -33,6 +34,7 @@ public class CategoriaTourService {
                         .id(categoria.getId())
                         .nombre(categoria.getNombre())
                         .descripcion(categoria.getDescripcion())
+                        .imagen(categoria.getImagen())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -48,6 +50,7 @@ public class CategoriaTourService {
                 .id(categoria.getId())
                 .nombre(categoria.getNombre())
                 .descripcion(categoria.getDescripcion())
+                .imagen(categoria.getImagen())
                 .build();
     }
 
@@ -67,6 +70,7 @@ public class CategoriaTourService {
                 .id(categoriaActualizada.getId())
                 .nombre(categoriaActualizada.getNombre())
                 .descripcion(categoriaActualizada.getDescripcion())
+                .imagen(categoriaActualizada.getImagen())
                 .build();
     }
 

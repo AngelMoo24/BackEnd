@@ -23,6 +23,9 @@ public class CategoriaTour {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
+    @Column
+    private String imagen;
+
     @OneToMany(mappedBy = "categoriaTour", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Tour> tours;
 }

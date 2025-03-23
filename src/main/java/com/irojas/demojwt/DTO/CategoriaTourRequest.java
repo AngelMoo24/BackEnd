@@ -12,4 +12,6 @@ public class CategoriaTourRequest {
 
     private String nombre;
     private String descripcion;
+    private String imagen;
+
 }
