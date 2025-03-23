@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .disable())
             .authorizeHttpRequests(authRequest ->
               authRequest
-                .requestMatchers("api/categorias/**","/auth/**","/tours/detalles/{id}","/tours", "/v3/api-docs/**", "swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()
+                .requestMatchers("api/categorias/**","/auth/**","/tours/detalles/{id}","/tours","/tours/categoria/{categoriaId}", "/v3/api-docs/**", "swagger-ui/**", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
                 )
             .sessionManagement(sessionManager->
